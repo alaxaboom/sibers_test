@@ -11,3 +11,5 @@ To start the server: npm start
 
 To access the application:
 Open the main.html file manually from the frontend folder in your browser
+
+Admin login: username admin, password 1
