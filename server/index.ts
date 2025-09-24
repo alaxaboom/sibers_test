@@ -1,8 +1,8 @@
 import express from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
-import sequelize from "./dbConfig";
-import userRouter from "./userRouter";
+import sequelize from "./utils/dbConfig";
+import userRouter from "./routers/userRouter";
 import dotenv from "dotenv";
 
 dotenv.config();

@@ -1,16 +1,16 @@
 import { Model, DataTypes, Optional } from "sequelize";
-import sequelize from "./dbConfig";
+import sequelize from "../utils/dbConfig";
 
 interface UserAttributes {
   id: number;
   username: string;
   password: string;
-  first_name: string;
-  last_name: string;
-  gender: string;
-  birthdate: Date;
-  email?: string;
-  role?: string;
+  email: string;
+  first_name?: string | null;
+  last_name?: string | null;
+  gender?: string | null;
+  birthdate?: Date | null;
+  role?: string | null;
 }
 
 interface UserCreationAttributes extends Optional<UserAttributes, "id"> {}
@@ -22,12 +22,12 @@ class User
   public id!: number;
   public username!: string;
   public password!: string;
-  public first_name!: string;
-  public last_name!: string;
-  public gender!: string;
-  public birthdate!: Date;
-  public email?: string;
-  public role?: string;
+  public email!: string;
+  public first_name!: string | null;
+  public last_name!: string | null;
+  public gender!: string | null;
+  public birthdate!: Date | null;
+  public role!: string | null;
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -53,30 +53,31 @@ User.init(
         this.setDataValue("password", hash);
       },
     },
-    first_name: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    last_name: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    gender: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    birthdate: {
-      type: DataTypes.DATEONLY,
-      allowNull: false,
-    },
     email: {
       type: DataTypes.STRING,
       unique: true,
+      allowNull: false,
+    },
+    first_name: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    last_name: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    gender: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    birthdate: {
+      type: DataTypes.DATEONLY,
       allowNull: true,
     },
     role: {
       type: DataTypes.STRING,
-      allowNull: true,
+      allowNull: false, // Теперь not null
+      defaultValue: "user", // Default 'user'
     },
   },
   {
@@ -84,5 +85,22 @@ User.init(
     modelName: "User",
   }
 );
-
+User.afterSync(async () => {
+  try {
+    const admin = await User.findOne({ where: { username: "admin" } });
+    if (!admin) {
+      await User.create({
+        username: "admin",
+        password: "admin123",
+        email: "admin@example.com",
+        first_name: "Admin",
+        last_name: "User",
+        role: "admin",
+      });
+      console.log("Admin user created");
+    }
+  } catch (error) {
+    console.error("Error creating admin user:", error);
+  }
+});
 export default User;
